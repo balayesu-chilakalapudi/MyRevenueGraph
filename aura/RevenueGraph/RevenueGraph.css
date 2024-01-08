@@ -1,0 +1,11 @@
+.THIS .filtersize{
+    width:30%;
+}
+
+.THIS .filter_label{   
+    text-align: right;
+    padding-top: 20px;
+    font-size: 14px;
+    padding-right: 10px;
+    padding-left:10px;
+}

@@ -1,0 +1,303 @@
+<aura:component description="DataVisualization" controller="RevenueGraphController"
+                implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId" access="global">
+    <aura:attribute name="userChoice" type="String" default="Last Year" />
+    <aura:attribute name="loading" type="Boolean" default="true" />
+    <aura:attribute name="twelvemonthsofdataLoading" type="Boolean" default="false" />
+    <aura:attribute name="revenueStreams" type="List" default="[]" />
+    <aura:attribute name="CasesServiceTicket" type="List" default="[]" />
+    <aura:attribute name="CasesDetachAndReinstall" type="List" default="[]" />
+    <aura:attribute name="CasesEVCharging" type="List" default="[]" />
+    <aura:attribute name="Opportunities" type="List" default="[]" />
+    <aura:attribute name="CaseWrapList" type="List" default="[]" />
+    <aura:attribute name="revenue_total_value" type="decimal" default="0" />
+    <ltng:require scripts="{!$Resource.Chartjs}" afterScriptsLoaded="{!c.ctr}"/>
+    <div style="background-color:white;padding:1%;border:1px solid gray">
+        <br />
+        <center><span style="font-size:24px;font-weight:bold;">Revenue Reports</span></center>
+        <br />
+        <div class="slds-grid slds-wrap slds-theme--default">
+            <div class="slds-col slds-size--1-of-1 slds-small-size--2-of-5 slds-medium-size--2-of-5">   '
+                <br />
+                <div style="margin:5%;padding:2%;border:1px solid gray">
+                    <table style="width:80% !important;">
+                        <tr>
+                            <td class="filter_label">Time Period</td>
+                            <td>
+                                <lightning:select aura:id="select" variant="label-hidden" name="select1" label="Time Period" required="false"  class="">        
+                                   <option value="Last Year">Last Year</option>                                    
+                                    <option value="Current month report">Current month report</option>
+                                    <option value="Current Year">Current Year</option>                              
+                                </lightning:select>
+                            </td>
+                            <td class="filter_label">
+                                <lightning:button variant="brand" label="Submit" title="Submit" onclick="{! c.onChange }" />
+                            </td>
+                        </tr>
+                    </table>
+                    
+                    <br /><br />
+                    <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+                        <thead>
+                            <tr class="slds-line-height_reset">
+                                <th scope="col">Object + Recordtype</th>
+                                <th scope="col">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <aura:iteration items="{!v.revenueStreams}" var="revenue">
+                                <tr class="slds-line-height_reset">
+                                    <td >{!revenue.key}</td>
+                                    <td >${!revenue.value}</td>
+                                </tr>
+                            </aura:iteration> 
+                            <tr class="slds-line-height_reset">
+                                    <td ></td>
+                                    <td style="font-weight:bold;font-size:18px">${!v.revenue_total_value}</td>
+                                </tr>
+                        </tbody>
+                    </table>   
+                    
+                </div>
+            </div>
+            
+            <div class="slds-col slds-size--1-of-1 slds-small-size--3-of-5 slds-medium-size--3-of-5">
+                <div style="margin:1%;padding:2%;">
+                    <br />
+                    <lightning:spinner alternativeText="Loading" size="medium" class="{!v.loading?'slds-show':'slds-hide'}" />
+                    <canvas aura:id="doughnutChart" id="doughnutChart" class="{!v.userChoice=='Current month report'?'slds-show':'slds-hide'}" />                    
+                    <canvas aura:id="stackbarChart" id="stackbarChart" class="{!(v.userChoice=='Current Year' || v.userChoice=='Last Year' || v.userChoice=='Other')?'slds-show':'slds-hide'}" />
+                    <br />
+                </div>
+            </div>
+        </div>
+        <br />
+        <div style=";margin:1%;padding:1%;">
+            <aura:if isTrue="{!v.userChoice=='Current Year' || v.userChoice=='Last Year' || v.userChoice=='Other'}">
+                <aura:if isTrue="{!v.twelvemonthsofdataLoading}">
+                    <lightning:spinner />
+                    <aura:set attribute="else">
+                        <!--section 1 start--> 
+    <div class="slds-section slds-is-open animate" aura:id="lunchSection1">
+        <!--section header-->
+        <h3 class="slds-section__title">
+            <button aria-controls="lunchItemList" class="slds-button slds-section__title-action" onclick="{!c.toggleSection}" data-auraId="lunchSection1">
+                <lightning:icon iconName="utility:switch"
+                                size="x-small"
+                                class="slds-section__title-action-icon slds-button__icon_left"
+                                alternativeText="button icon"
+                                />
+                <span class="slds-truncate" title="{!v.userChoice}">{!v.userChoice}</span>
+            </button>
+        </h3>
+        <!--section body-->
+        <div class="slds-section__content" id="lunchItemList">
+             <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+                           <!-- <caption  style="font-weight:bold;font-size:18px">12 months of data</caption> -->
+                            <thead>
+                                <tr>
+                                    <th scope="col">Month</th>
+                                    <th scope="col">EV Charging</th>
+                                    <th scope="col">Service Ticket</th>
+                                    <th scope="col">Detach And Reinstall</th>
+                                    <th scope="col">Solar Roof</th>
+                                     <th scope="col">Solar Storage</th>
+                                     <th scope="col">Commercial</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <aura:iteration items="{!v.CaseWrapList}" var="cwObj">
+                                    <tr>
+                                        <td>{!cwObj.key}</td>
+                                        <td>${!cwObj.value.CasesWithEVCharging}</td>
+                                        <td>${!cwObj.value.CasesServiceTicket}</td>
+                                        <td>${!cwObj.value.CasesDetach}</td>
+                                        <td>${!cwObj.value.OpportunitiesSolarRoof}</td>
+                                        <td>${!cwObj.value.OpportunitiesSolarStorage}</td>
+                                        <td>${!cwObj.value.OpportunitiesCommercial}</td>
+                                    </tr>
+                                </aura:iteration>
+                            </tbody>
+                        </table>
+        </div>
+    </div>
+    <!--section 1 end-->
+     
+                       
+                    </aura:set>
+                </aura:if>
+                <br /> 
+                <aura:set attribute="else">
+                
+               
+            <!--section 1 start--> 
+    <div class="slds-section slds-is-open animate" aura:id="lunchSection2">
+        <!--section header-->
+        <h3 class="slds-section__title">
+            <button aria-controls="lunchItemList" class="slds-button slds-section__title-action" onclick="{!c.toggleSection}" data-auraId="lunchSection2">
+                <lightning:icon iconName="utility:switch"
+                                size="x-small"
+                                class="slds-section__title-action-icon slds-button__icon_left"
+                                alternativeText="button icon"
+                                />
+                <span class="slds-truncate" title="Cases - Service Ticket">Cases - Service Ticket</span>
+            </button>
+        </h3>
+        <!--section body-->
+        <div class="slds-section__content" id="lunchItemList">
+             <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+               <!-- <caption  style="font-weight:bold;font-size:18px">Cases - Service Ticket</caption>  -->
+                <thead>
+                    <tr>
+                        <th scope="col">Number</th>
+                        <th scope="col">Case Owner</th>
+                        <th scope="col">Account Name</th>
+                        <th scope="col">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <aura:iteration items="{!v.CasesServiceTicket}" var="caseObj">
+                        <tr>
+                            <td>{!caseObj.CaseNumber}</td>
+                            <td>{!caseObj.Owner.Name}</td>
+                            <td>{!caseObj.Account.Name}</td>
+                            <td>${!caseObj.Total_Revenue__c}</td>
+                        </tr>
+                    </aura:iteration>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!--section 1 end-->
+     
+           
+            <br /> 
+                    <!--section 1 start--> 
+    <div class="slds-section slds-is-open animate" aura:id="lunchSection3">
+        <!--section header-->
+        <h3 class="slds-section__title">
+            <button aria-controls="lunchItemList" class="slds-button slds-section__title-action" onclick="{!c.toggleSection}" data-auraId="lunchSection3">
+                <lightning:icon iconName="utility:switch"
+                                size="x-small"
+                                class="slds-section__title-action-icon slds-button__icon_left"
+                                alternativeText="button icon"
+                                />
+                <span class="slds-truncate" title="Cases – EV Charging">Cases – EV Charging</span>
+            </button>
+        </h3>
+        <!--section body-->
+        <div class="slds-section__content" id="lunchItemList">
+           <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+            <!--    <caption  style="font-weight:bold;font-size:18px">Cases – EV Charging</caption> -->
+                <thead>
+                    <tr>
+                        <th scope="col">Number</th>
+                        <th scope="col">Case Owner</th>
+                        <th scope="col">Account Name</th>
+                        <th scope="col">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <aura:iteration items="{!v.CasesEVCharging}" var="caseObj">
+                        <tr>
+                            <td>{!caseObj.CaseNumber}</td>
+                            <td>{!caseObj.Owner.Name}</td>
+                            <td>{!caseObj.Account.Name}</td>
+                            <td>${!caseObj.Total__c}</td>
+                        </tr>
+                    </aura:iteration>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!--section 1 end-->
+     
+            <br />
+                    <!--section 1 start--> 
+    <div class="slds-section slds-is-open animate" aura:id="lunchSection4">
+        <!--section header-->
+        <h3 class="slds-section__title">
+            <button aria-controls="lunchItemList" class="slds-button slds-section__title-action" onclick="{!c.toggleSection}" data-auraId="lunchSection4">
+                <lightning:icon iconName="utility:switch"
+                                size="x-small"
+                                class="slds-section__title-action-icon slds-button__icon_left"
+                                alternativeText="button icon"
+                                />
+                <span class="slds-truncate" title="Cases – Detach and Reinstall">Cases – Detach and Reinstall</span>
+            </button>
+        </h3>
+        <!--section body-->
+        <div class="slds-section__content" id="lunchItemList">
+             <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+              <!--  <caption  style="font-weight:bold;font-size:18px">Cases – Detach and Reinstall</caption> -->
+                <thead>
+                    <tr>
+                        <th scope="col">Number</th>
+                        <th scope="col">Case Owner</th>
+                        <th scope="col">Account Name</th>
+                        <th scope="col">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <aura:iteration items="{!v.CasesDetachAndReinstall}" var="caseObj">
+                        <tr>
+                            <td>{!caseObj.CaseNumber}</td>
+                            <td>{!caseObj.Owner.Name}</td>
+                            <td>{!caseObj.Account.Name}</td>
+                            <td>${!caseObj.Contract_Amount__c}</td>
+                        </tr>
+                    </aura:iteration>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!--section 1 end-->
+     
+           
+            <br /> 
+                    <!--section 1 start--> 
+    <div class="slds-section slds-is-open animate" aura:id="lunchSection5">
+        <!--section header-->
+        <h3 class="slds-section__title">
+            <button aria-controls="lunchItemList" class="slds-button slds-section__title-action" onclick="{!c.toggleSection}" data-auraId="lunchSection5">
+                <lightning:icon iconName="utility:switch"
+                                size="x-small"
+                                class="slds-section__title-action-icon slds-button__icon_left"
+                                alternativeText="button icon"
+                                />
+                <span class="slds-truncate" title="Opportunities">Opportunities</span>
+            </button>
+        </h3>
+        <!--section body-->
+        <div class="slds-section__content" id="lunchItemList">
+           <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+              <!--  <caption style="font-weight:bold;font-size:18px">Opportunities</caption> -->
+                <thead>
+                    <tr>
+                        <th scope="col">Name</th>
+                        <th scope="col">Opportunity Owner</th>
+                        <th scope="col">Account Name</th>
+                        <th scope="col">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <aura:iteration items="{!v.Opportunities}" var="oppObj">
+                        <tr>
+                            <td>{!oppObj.Name}</td>
+                            <td>{!oppObj.Owner.Name}</td>
+                            <td>{!oppObj.Account.Name}</td>
+                            <td>${!oppObj.Amount}</td>
+                        </tr>
+                    </aura:iteration>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!--section 1 end-->
+     
+            
+            <br />
+				 </aura:set>
+            </aura:if>
+        </div>
+    </div>
+</aura:component>

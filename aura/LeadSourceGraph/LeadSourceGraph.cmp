@@ -1,0 +1,95 @@
+<aura:component description="DataVisualization" controller="LeadSourceGraphController"
+                implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId" access="global">
+	<ltng:require scripts="{!$Resource.Chartjs}" afterScriptsLoaded="{!c.ctr}"/>
+    <aura:attribute name="loading" type="Boolean" default="true" />
+    <aura:attribute name="userChoice" type="String" default="Last Year" />
+    <aura:attribute name="CaseWrapList" type="List" default="Object[]" />
+    <div style="background-color:white;margin:2%;padding:2%;border:1px solid gray">
+        
+        <center>
+            <span style="font-size:20px">Lead/Contact Lead sources wise </span>
+        <br />
+        <table style="width:50% !important;">
+                        <tr>
+                            <td class="filter_label">Time Period</td>
+                            <td>
+                                <lightning:select aura:id="select" variant="label-hidden" name="select1" label="Time Period" required="false"  class=""> 
+                                    <option value="Last Year">Last Year</option> 
+                                    <option value="Current Year">Current Year</option>  
+                                    <option value="Current month">Current month </option> 
+                                </lightning:select>
+                            </td>
+                            <td class="filter_btn">
+                                <lightning:button variant="brand" label="Submit" title="Submit" onclick="{! c.onChange }" />
+                            </td>
+                        </tr>
+                    </table>
+        </center>
+        <br /><br />
+        <div id="barDiv"></div>
+        <lightning:spinner alternativeText="Loading" size="medium" class="{!v.loading?'slds-show':'slds-hide'}" />
+        <canvas aura:id="stackBarChart" id="stackBarChart" class="{!!v.loading?'slds-show':'slds-hide'}" />       
+        <br />
+         <!--section 1 start--> 
+    <div class="slds-section slds-is-open animate" aura:id="lunchSection1">
+        <!--section header-->
+        <h3 class="slds-section__title">
+            <button aria-controls="lunchItemList" class="slds-button slds-section__title-action" onclick="{!c.toggleSection}" data-auraId="lunchSection1">
+                <lightning:icon iconName="utility:switch"
+                                size="x-small"
+                                class="slds-section__title-action-icon slds-button__icon_left"
+                                alternativeText="button icon"
+                                />
+                <span class="slds-truncate" title="{!v.userChoice}">{!v.userChoice}</span>
+            </button>
+        </h3>
+        <!--section body-->
+        <div class="slds-section__content" id="lunchItemList">
+             <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+                           <!-- <caption  style="font-weight:bold;font-size:18px">12 months of data</caption> -->
+                            <thead>
+                                <tr>
+                                    <th scope="col">Lead Source</th>
+                                    <th scope="col">Jan</th>                                    
+                                    <th scope="col">Feb</th>
+                                    <th scope="col">Mar</th>
+                                    <th scope="col">Apr</th>
+                                    <th scope="col">May</th>
+                                    <th scope="col">Jun</th> 
+                                    <th scope="col">Jul</th>                                    
+                                    <th scope="col">Aug</th>
+                                    <th scope="col">Sep</th> 
+                                    <th scope="col">Oct</th> 
+                                    <th scope="col">Nov</th> 
+                                    <th scope="col">Dec</th> 
+									<th scope="col">Total</th> 
+                                </tr>
+                            </thead>
+                            <tbody>
+                               
+                                <aura:iteration items="{!v.CaseWrapList}" var="cwObj">
+                                    <tr>
+                                        <td>{!cwObj.key}</td>
+                                        <td>{!cwObj.jan}</td>
+                                        <td>{!cwObj.feb}</td>
+                                        <td>{!cwObj.mar}</td>
+                                        <td>{!cwObj.apr}</td>
+                                        <td>{!cwObj.may}</td>
+                                        <td>{!cwObj.jun}</td>
+                                        <td>{!cwObj.jul}</td>
+                                        <td>{!cwObj.aug}</td>
+                                        <td>{!cwObj.sep}</td>
+                                        <td>{!cwObj.oct}</td>
+                                        <td>{!cwObj.nov}</td>
+                                        <td>{!cwObj.dec}</td>
+                                        <td>{!cwObj.total}</td>
+                                    </tr>
+                                </aura:iteration>
+							
+                            </tbody>
+                        </table>
+        </div>
+    </div>
+    <!--section 1 end-->
+    </div>
+</aura:component>

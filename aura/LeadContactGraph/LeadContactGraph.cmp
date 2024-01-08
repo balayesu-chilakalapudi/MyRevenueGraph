@@ -1,0 +1,71 @@
+<aura:component description="DataVisualization" controller="LeadContactGraphController"
+                implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId" access="global">
+	<ltng:require scripts="{!$Resource.Chartjs}" afterScriptsLoaded="{!c.ctr}"/>
+    <aura:attribute name="loading" type="Boolean" default="true" />
+    <aura:attribute name="userChoice" type="String" default="Last Year" />
+    <aura:attribute name="CaseWrapList" type="List" default="[]" />
+    <div style="background-color:white;margin:2%;padding:2%;border:1px solid gray" id="mainDiv">
+        
+        <center>
+            <span style="font-size:20px">Lead Contact Graph</span>
+        <br />
+        <table style="width:50% !important;">
+                        <tr>
+                            <td class="filter_label">Time Period</td>
+                            <td>
+                                <lightning:select aura:id="select" variant="label-hidden" name="select1" label="Time Period" required="false"  class="">        
+                                   <option value="Last Year">Last Year</option> 
+                                    <option value="Current Year">Current Year</option>                              
+                                </lightning:select>
+                            </td>
+                            <td class="filter_btn">
+                                <lightning:button variant="brand" label="Submit" title="Submit" onclick="{! c.onChange }" />
+                            </td>
+                        </tr>
+                    </table>
+        </center>
+        <br /><br />
+        <div id="barDiv"></div>
+        <lightning:spinner alternativeText="Loading" size="medium" class="{!v.loading?'slds-show':'slds-hide'}" />
+        <canvas aura:id="stackBarChart" id="stackBarChart" class="{!!v.loading?'slds-show':'slds-hide'}" />    
+        
+        <br />
+         <!--section 1 start--> 
+    <div class="slds-section slds-is-open animate" aura:id="lunchSection1">
+        <!--section header-->
+        <h3 class="slds-section__title">
+            <button aria-controls="lunchItemList" class="slds-button slds-section__title-action" onclick="{!c.toggleSection}" data-auraId="lunchSection1">
+                <lightning:icon iconName="utility:switch"
+                                size="x-small"
+                                class="slds-section__title-action-icon slds-button__icon_left"
+                                alternativeText="button icon"
+                                />
+                <span class="slds-truncate" title="{!v.userChoice}">{!v.userChoice}</span>
+            </button>
+        </h3>
+        <!--section body-->
+        <div class="slds-section__content" id="lunchItemList">
+             <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+                           <!-- <caption  style="font-weight:bold;font-size:18px">12 months of data</caption> -->
+                            <thead>
+                                <tr>
+                                    <th scope="col">Month</th>
+                                    <th scope="col">Leads</th>
+                                    <th scope="col">Contacts</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <aura:iteration items="{!v.CaseWrapList}" var="cwObj">
+                                    <tr>
+                                        <td>{!cwObj.key}</td>
+                                        <td>{!cwObj.value.Leads}</td>
+                                        <td>{!cwObj.value.Contacts}</td>
+                                    </tr>
+                                </aura:iteration>
+                            </tbody>
+                        </table>
+        </div>
+    </div>
+    <!--section 1 end-->
+    </div>
+</aura:component>

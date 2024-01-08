@@ -1,0 +1,23 @@
+.THIS .filtersize{
+    width:30%;
+}
+
+.THIS .filter_label{   
+    text-align: right;
+    padding-top: 20px;
+    font-size: 14px;
+    padding-right: 10px;
+    padding-left:10px;
+}
+
+.THIS .filter_btn{
+     padding-right: 0px;
+    padding-left:5px;
+    padding-top: 20px;
+}
+
+.THIS .canvas_style{
+    margin:5%;
+    padding:5%;
+    border:1px solid gray;
+}
